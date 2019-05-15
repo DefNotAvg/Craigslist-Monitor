@@ -67,9 +67,9 @@ def gather_image(link):
 	try:
 		response = requests.get(link, headers=headers)
 		content = response.content.decode('utf-8')
-	except requests.exceptions.ConnectionError:
+		return content.split('<img src="')[1].split('"')[0]
+	except (requests.exceptions.ConnectionError, IndexError):
 		return ''
-	return content.split('<img src="')[1].split('"')[0]
 
 def gather_items(query, items):
 	result = dict(items)
