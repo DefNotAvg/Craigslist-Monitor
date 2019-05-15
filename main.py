@@ -80,7 +80,7 @@ def gather_items(query, items):
 		('postal', zip_code),
 	)
 	if max_price:
-		params += ('max_price', max_price)
+		params += (('max_price', max_price),)
 	try:
 		response = requests.get('https://{}.craigslist.org/search/sss'.format(location), headers=headers, params=params)
 		content = response.content.decode('utf-8')
