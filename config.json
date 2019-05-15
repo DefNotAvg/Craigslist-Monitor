@@ -1,0 +1,13 @@
+{	
+	"location": "LOCATION",
+	"searches": {
+		"QUERY": "CHANNEL",
+		"QUERY": "CHANNEL"
+	},
+	"zipCode": "ZIP_CODE",
+	"distance": "NUMBER_OF_MILES",
+	"maxPrice": "MAX_PRICE",
+	"delay": 30,
+	"width": 50,
+	"slackToken": "SLACK_TOKEN"
+}
