@@ -69,7 +69,7 @@ def gather_image(link):
 		content = response.content.decode('utf-8')
 		return content.split('<img src="')[1].split('"')[0]
 	except (requests.exceptions.ConnectionError, IndexError):
-		return ''
+		return 'https://cdn.browshot.com/static/images/not-found.png'
 
 def gather_items(query, items):
 	result = dict(items)
@@ -100,7 +100,7 @@ def gather_items(query, items):
 		result[item[0]]['link'] = item[3]
 	return result, True
 
-def send_message(item, channel):
+def send_message(item, channel, ts=None):
 	attachments = [
 		{
 			'fallback': html.unescape(item['title']).title(),
@@ -114,25 +114,28 @@ def send_message(item, channel):
 					'short': True
 				}
 			],
+            'image_url': gather_image(item['link']),
 			'footer': 'Powered by @DefNotAvg',
 			'footer_icon': 'https://pbs.twimg.com/profile_images/1085294066303160320/D7gH8G_-_400x400.jpg',
 			'ts': time()
 		}
 	]
-	image = gather_image(item['link'])
-	if image:
-		attachments[0]['image_url'] = image
 	center(html.unescape(item['title']).title())
 	center('Price: {}'.format(item['price']))
-	message = sc.api_call(
-		'chat.postMessage',
-		channel = channel,
-		attachments = attachments
-	)
-	if message['ok']:
-		center('Successfully sent message!!')
+	if ts:
+		message = sc.api_call(
+			'chat.update',
+			ts = ts,
+			channel = channel,
+			attachments = attachments
+		)
 	else:
-		center('Unable to send message.')
+		message = sc.api_call(
+			'chat.postMessage',
+			channel = channel,
+			attachments = attachments
+		)
+	return message
 
 initial = True
 items = {}
@@ -160,7 +163,7 @@ while True:
 			for data_id in gathered_items.keys():
 				if data_id not in items[query].keys():
 					new[data_id] = gathered_items[data_id]
-				elif gathered_items[data_id] != items[query][data_id]:
+				elif any(gathered_items[data_id][key] != items[query][data_id][key] for key in gathered_items[data_id].keys()):
 					new[data_id] = gathered_items[data_id]
 			if success:
 				if len(list(new.keys())) == 0:
@@ -174,10 +177,18 @@ while True:
 			if new:
 				center(' ')
 				for key in new.keys():
-					send_message(new[key], searches[query])
+					try:
+						message = send_message(new[key], searches[query], items[query][key]['ts'])
+					except KeyError:
+						message = send_message(new[key], searches[query])
+					if message['ok']:
+						center('Successfully sent message!!')
+						items[query][key]['ts'] = message['ts']
+					else:
+						center('Unable to send message.')
 					center(' ')
+					items[query][key] = new[key]
 			smart_sleep(delay)
-			items[query] = gathered_items
 		if i != len(list(searches.keys())) - 1:
 			center('-', '-')
 		if success:
