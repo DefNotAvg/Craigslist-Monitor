@@ -25,6 +25,7 @@ Edit config.json to your liking then run main.py.
 
 ## To-Do
 
-- [ ] Add support for searches with multiple pages of results
+- [x] Add support for searches with multiple pages of results
+- [ ] Allow parameters such as maxPrice to be set for each query
 - [ ] Add support for more support parameters
 - [ ] Update README with examples

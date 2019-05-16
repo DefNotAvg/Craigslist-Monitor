@@ -1,4 +1,4 @@
-from __future__ import print_function
+from __future__ import print_function, division
 import requests
 import json
 import os
@@ -71,7 +71,7 @@ def gather_image(link):
 	except (requests.exceptions.ConnectionError, IndexError):
 		return 'https://cdn.browshot.com/static/images/not-found.png'
 
-def gather_items(query, items):
+def gather_items(query, items, current=None, page=1):
 	result = dict(items)
 	links = []
 	params = (
@@ -81,6 +81,8 @@ def gather_items(query, items):
 	)
 	if max_price:
 		params += (('max_price', max_price),)
+	if current:
+		params += (('s', current),)
 	try:
 		response = requests.get('https://{}.craigslist.org/search/sss'.format(location), headers=headers, params=params)
 		content = response.content.decode('utf-8')
@@ -98,7 +100,13 @@ def gather_items(query, items):
 		result[item[0]]['title'] = item[1]
 		result[item[0]]['price'] = item[2]
 		result[item[0]]['link'] = item[3]
-	return result, True
+	if range_to == total_count:
+		return result, True
+	else:
+		center('Successfully gathered page {}/{}!!'.format(str(page), str(int(math.ceil(int(total_count) / 120)))))
+		smart_sleep(delay)
+		page += 1
+		return gather_items(query, result, range_to, page)
 
 def send_message(item, channel, ts=None):
 	attachments = [
