@@ -183,11 +183,11 @@ while True:
 						message = send_message(new[key], searches[query])
 					if message['ok']:
 						center('Successfully sent message!!')
+						items[query][key] = new[key]
 						items[query][key]['ts'] = message['ts']
 					else:
 						center('Unable to send message.')
 					center(' ')
-					items[query][key] = new[key]
 			smart_sleep(delay)
 		if i != len(list(searches.keys())) - 1:
 			center('-', '-')
