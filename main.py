@@ -69,8 +69,6 @@ def gather_image(link):
 	try:
 		response = requests.get(link, headers=headers)
 		content = response.content.decode('utf-8')
-		print(content)
-		quit()
 		return content.split('<img src="')[1].split('"')[0]
 	except (requests.exceptions.ConnectionError, IndexError):
 		return 'https://cdn.browshot.com/static/images/not-found.png'
