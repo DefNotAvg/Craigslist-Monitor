@@ -23,6 +23,8 @@ searches = config['searches']
 zip_code = config['zipCode']
 distance = config['distance']
 max_price = config['maxPrice']
+in_title = config['inTitle']
+strict_match = config['strictMatch']
 delay = config['delay']
 width = config['width']
 slack_token = config['slackToken']
@@ -67,6 +69,8 @@ def gather_image(link):
 	try:
 		response = requests.get(link, headers=headers)
 		content = response.content.decode('utf-8')
+		print(content)
+		quit()
 		return content.split('<img src="')[1].split('"')[0]
 	except (requests.exceptions.ConnectionError, IndexError):
 		return 'https://cdn.browshot.com/static/images/not-found.png'
@@ -74,6 +78,7 @@ def gather_image(link):
 def gather_items(query, items, current=None, page=1):
 	result = dict(items)
 	links = []
+	prices = []
 	params = (
 		('query', query),
 		('search_distance', distance),
@@ -94,12 +99,26 @@ def gather_items(query, items, current=None, page=1):
 	data_ids = re.findall(r'data-id="(.*?)"', content)
 	for data_id in data_ids:
 		links.append('https://{}.craigslist.org/{}/{}.html'.format(location, content.split(data_id)[-4].split('craigslist.org/')[-1].split('/')[0], data_id))
-	prices = re.findall(r'<span class="result-price">(.*?)</span>', content)
+		prices.append(content.split(data_id)[-2].split('<span class="result-price">')[1].split('</span>')[0])
 	for item in zip(data_ids, titles, prices, links):
-		result[item[0]] = {}
-		result[item[0]]['title'] = item[1]
-		result[item[0]]['price'] = item[2]
-		result[item[0]]['link'] = item[3]
+		if in_title:
+			if strict_match:
+				if query.lower() in html.unescape(item[1]).lower():
+					result[item[0]] = {}
+					result[item[0]]['title'] = item[1]
+					result[item[0]]['price'] = item[2]
+					result[item[0]]['link'] = item[3]
+			else:
+				if all(keyword.lower() in html.unescape(item[1]).lower() for keyword in query.split(' ')):
+					result[item[0]] = {}
+					result[item[0]]['title'] = item[1]
+					result[item[0]]['price'] = item[2]
+					result[item[0]]['link'] = item[3]
+		else:
+			result[item[0]] = {}
+			result[item[0]]['title'] = item[1]
+			result[item[0]]['price'] = item[2]
+			result[item[0]]['link'] = item[3]
 	if range_to == total_count:
 		return result, True
 	else:
