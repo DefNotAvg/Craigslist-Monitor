@@ -19,7 +19,7 @@ Edit config.json to your liking then run main.py.
 
 ## Prerequisites
 
-* Currently working on Python 3.7.3
+* Currently working on Python 2.7.16 and Python 3.7.3
 * [requests](http://docs.python-requests.org/en/master/)
 * [slackclient](https://python-slackclient.readthedocs.io/en/latest/)
 

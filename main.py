@@ -4,9 +4,16 @@ import json
 import os
 import math
 import re
-import html
+import sys
 from time import sleep, time
 from slackclient import SlackClient
+
+VERSION = sys.version_info[0]
+
+if VERSION == 2:
+	from HTMLParser import HTMLParser as html
+else:
+	import html
 
 def load_from_json(file):
 	try:
@@ -68,7 +75,10 @@ def smart_sleep(delay):
 def gather_image(link):
 	try:
 		response = requests.get(link, headers=headers)
-		content = response.content.decode('utf-8')
+		if VERSION == 2:
+			content = response.content
+		else:
+			content = response.content.decode('utf-8')
 		return content.split('<img src="')[1].split('"')[0]
 	except (requests.exceptions.ConnectionError, IndexError):
 		return 'https://cdn.browshot.com/static/images/not-found.png'
@@ -88,7 +98,10 @@ def gather_items(query, items, current=None, page=1):
 		params += (('s', current),)
 	try:
 		response = requests.get('https://{}.craigslist.org/search/sss'.format(location), headers=headers, params=params)
-		content = response.content.decode('utf-8')
+		if VERSION == 2:
+			content = response.content
+		else:
+			content = response.content.decode('utf-8')
 	except requests.exceptions.ConnectionError:
 		return result, False
 	range_to = content.split('<span class="rangeTo">')[1].split('</span>')[0]
