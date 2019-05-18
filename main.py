@@ -11,7 +11,8 @@ from slackclient import SlackClient
 VERSION = sys.version_info[0]
 
 if VERSION == 2:
-	from HTMLParser import HTMLParser as html
+	from HTMLParser import HTMLParser
+	html = HTMLParser()
 else:
 	import html
 
