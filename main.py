@@ -76,13 +76,17 @@ def smart_sleep(delay):
 def gather_image(link):
 	try:
 		response = requests.get(link, headers=headers)
-		if VERSION == 2:
-			content = response.content
-		else:
-			content = response.content.decode('utf-8')
+		content = response.content.decode('utf-8')
 		return content.split('<img src="')[1].split('"')[0]
-	except (requests.exceptions.ConnectionError, IndexError):
+	except requests.exceptions.ConnectionError:
 		return 'https://cdn.browshot.com/static/images/not-found.png'
+	except IndexError:
+		print(content)
+		if VERSION == 2:
+			center('Try using Python 3.7.3.')
+		else:
+			center('Try using Python 2.7.16.')
+		quit()
 
 def gather_items(query, items, current=None, page=1):
 	result = dict(items)
@@ -99,14 +103,19 @@ def gather_items(query, items, current=None, page=1):
 		params += (('s', current),)
 	try:
 		response = requests.get('https://{}.craigslist.org/search/sss'.format(location), headers=headers, params=params)
-		if VERSION == 2:
-			content = response.content
-		else:
-			content = response.content.decode('utf-8')
+		content = response.content.decode('utf-8')
 	except requests.exceptions.ConnectionError:
 		return result, False
-	range_to = content.split('<span class="rangeTo">')[1].split('</span>')[0]
-	total_count = content.split('<span class="totalcount">')[1].split('</span>')[0]
+	try:
+		range_to = content.split('<span class="rangeTo">')[1].split('</span>')[0]
+		total_count = content.split('<span class="totalcount">')[1].split('</span>')[0]
+	except IndexError:
+		print(content)
+		if VERSION == 2:
+			center('Try using Python 3.7.3.')
+		else:
+			center('Try using Python 2.7.16.')
+		quit()
 	titles = re.findall(r'class="result-title hdrlnk">(.*?)</a>', content)
 	data_ids = re.findall(r'data-id="(.*?)"', content)
 	for data_id in data_ids:
@@ -153,7 +162,7 @@ def send_message(item, channel, ts=None):
 					'short': True
 				}
 			],
-            'image_url': gather_image(item['link']),
+			'image_url': gather_image(item['link']),
 			'footer': 'Powered by @DefNotAvg',
 			'footer_icon': 'https://pbs.twimg.com/profile_images/1085294066303160320/D7gH8G_-_400x400.jpg',
 			'ts': time()
