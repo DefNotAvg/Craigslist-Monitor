@@ -78,15 +78,8 @@ def gather_image(link):
 		response = requests.get(link, headers=headers)
 		content = response.content.decode('utf-8')
 		return content.split('<img src="')[1].split('"')[0]
-	except requests.exceptions.ConnectionError:
+	except (requests.exceptions.ConnectionError, IndexError):
 		return 'https://cdn.browshot.com/static/images/not-found.png'
-	except IndexError:
-		print(content)
-		if VERSION == 2:
-			center('Try using Python 3.7.3.')
-		else:
-			center('Try using Python 2.7.16.')
-		quit()
 
 def gather_items(query, items, current=None, page=1):
 	result = dict(items)
